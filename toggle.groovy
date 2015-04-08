@@ -25,11 +25,15 @@ definition(
 
 
 preferences {
+    section("App Information") {
+        paragraph "Set the number of hours you want to toggle and this app will toggle a set of outlets at that time. Tapping the app will toggle it immediately."
+    }
     section("Outlets to toggle:") {
         input "outlets", "capability.switch", title: "Outlets", required: true, multiple: true
     }
     section("Hours to leave on/off:") {
-        input "hours", "number", title: "Hours", required: true
+        paragraph "crontab example: 0 0 0/4 * * ?"
+        input "hours", "number", title: "Hours", required: true, defaultValue: 4
     }
 }
 
@@ -49,10 +53,11 @@ def updated() {
 def initialize() {
     def cron = "0 0 0/${hours} * * ?"
     log.debug "Setting up cron with: ${cron}"
-    schedule(cron, toggleSwitches); 
+    schedule(cron, toggleSwitches);
+    subscribe(app, toggleSwitches);
 }
 
-def toggleSwitches() {
+def toggleSwitches(evt) {
     outlets.each {
         def currentValue = it.currentValue("switch");
         def msg = "${it.displayName} is ${currentValue}, switching it "
